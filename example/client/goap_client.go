@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	req := coap.Message{
+	req := &coap.Message{
 		Type:      coap.Confirmable,
 		Code:      coap.GET,
 		MessageID: 12345,

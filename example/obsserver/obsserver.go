@@ -13,7 +13,7 @@ func periodicTransmitter(l *net.UDPConn, a *net.UDPAddr, m *coap.Message) {
 	subded := time.Now()
 
 	for {
-		msg := coap.Message{
+		msg := &coap.Message{
 			Type:      coap.Acknowledgement,
 			Code:      coap.Content,
 			MessageID: m.MessageID,
