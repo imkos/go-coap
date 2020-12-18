@@ -18,7 +18,7 @@ func startUDPLisenter(t *testing.T) (*net.UDPConn, string) {
 	return udpListener, coapServerAddr
 }
 
-func dialAndSend(t *testing.T, addr string, req Message) *Message {
+func dialAndSend(t *testing.T, addr string, req *Message) *Message {
 	c, err := Dial("udp", addr)
 	if err != nil {
 		t.Fatalf("Error dialing: %v", err)
@@ -31,7 +31,7 @@ func dialAndSend(t *testing.T, addr string, req Message) *Message {
 }
 
 func TestServeWithAckResponse(t *testing.T) {
-	req := Message{
+	req := &Message{
 		Type:      Confirmable,
 		Code:      POST,
 		MessageID: 9876,
@@ -40,7 +40,7 @@ func TestServeWithAckResponse(t *testing.T) {
 	req.SetOption(ContentFormat, TextPlain)
 	req.SetPathString("/req/path")
 
-	res := Message{
+	res := &Message{
 		Type:      Acknowledgement,
 		Code:      Content,
 		MessageID: req.MessageID,
@@ -50,8 +50,8 @@ func TestServeWithAckResponse(t *testing.T) {
 	res.SetPath(req.Path())
 
 	handler := FuncHandler(func(l *net.UDPConn, a *net.UDPAddr, m *Message) *Message {
-		assertEqualMessages(t, req, *m)
-		return &res
+		assertEqualMessages(t, req, m)
+		return res
 	})
 
 	udpListener, coapServerAddr := startUDPLisenter(t)
@@ -62,11 +62,11 @@ func TestServeWithAckResponse(t *testing.T) {
 	if m == nil {
 		t.Fatalf("Didn't receive CoAP response")
 	}
-	assertEqualMessages(t, res, *m)
+	assertEqualMessages(t, res, m)
 }
 
 func TestServeWithoutAckResponse(t *testing.T) {
-	req := Message{
+	req := &Message{
 		Type:      NonConfirmable,
 		Code:      POST,
 		MessageID: 54321,
@@ -75,7 +75,7 @@ func TestServeWithoutAckResponse(t *testing.T) {
 	req.SetOption(ContentFormat, AppOctets)
 
 	handler := FuncHandler(func(l *net.UDPConn, a *net.UDPAddr, m *Message) *Message {
-		assertEqualMessages(t, req, *m)
+		assertEqualMessages(t, req, m)
 		return nil
 	})
 

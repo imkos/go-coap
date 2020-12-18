@@ -15,7 +15,7 @@ var (
 
 // assertEqualMessages compares the e(xptected) message to the a(ctual) message
 // and reports any diffs with t.Errorf.
-func assertEqualMessages(t *testing.T, e, a Message) {
+func assertEqualMessages(t *testing.T, e, a *Message) {
 	if e.Type != a.Type {
 		t.Errorf("Expected type %v, got %v", e.Type, a.Type)
 	}
@@ -35,7 +35,7 @@ func assertEqualMessages(t *testing.T, e, a Message) {
 	if len(e.opts) != len(a.opts) {
 		t.Errorf("Expected %v options, got %v", len(e.opts), len(a.opts))
 	} else {
-		for i, _ := range e.opts {
+		for i := range e.opts {
 			if e.opts[i].ID != a.opts[i].ID {
 				t.Errorf("Expected option ID %v, got %v", e.opts[i].ID, a.opts[i].ID)
 				continue
@@ -380,9 +380,9 @@ func TestEncodeMessageVerySmall2(t *testing.T) {
 
 func TestEncodeSeveral(t *testing.T) {
 	tests := map[string][]string{
-		"a":   []string{"a"},
-		"axe": []string{"axe"},
-		"a/b/c/d/e/f/h/g/i/j": []string{"a", "b", "c", "d", "e",
+		"a":   {"a"},
+		"axe": {"axe"},
+		"a/b/c/d/e/f/h/g/i/j": {"a", "b", "c", "d", "e",
 			"f", "h", "g", "i", "j"},
 	}
 	for p, a := range tests {
@@ -770,7 +770,7 @@ func TestDecodeContentFormatOptionToMediaTypeLarge(t *testing.T) {
 }
 
 func TestEncodeMessageWithAllOptions(t *testing.T) {
-	req := Message{
+	req := &Message{
 		Type:      Confirmable,
 		Code:      GET,
 		MessageID: 12345,

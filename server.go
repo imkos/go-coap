@@ -26,8 +26,7 @@ func FuncHandler(f func(l *net.UDPConn, a *net.UDPAddr, m *Message) *Message) Ha
 	return funcHandler(f)
 }
 
-func handlePacket(l *net.UDPConn, data []byte, u *net.UDPAddr,
-	rh Handler) {
+func handlePacket(l *net.UDPConn, data []byte, u *net.UDPAddr, rh Handler) {
 
 	msg, err := ParseMessage(data)
 	if err != nil {
@@ -35,14 +34,15 @@ func handlePacket(l *net.UDPConn, data []byte, u *net.UDPAddr,
 		return
 	}
 
-	rv := rh.ServeCOAP(l, u, &msg)
+	rv := rh.ServeCOAP(l, u, msg)
 	if rv != nil {
-		Transmit(l, u, *rv)
+		log.Printf("Transmit: %+v", rv)
+		Transmit(l, u, rv)
 	}
 }
 
 // Transmit a message.
-func Transmit(l *net.UDPConn, a *net.UDPAddr, m Message) error {
+func Transmit(l *net.UDPConn, a *net.UDPAddr, m *Message) error {
 	d, err := m.MarshalBinary()
 	if err != nil {
 		return err
@@ -57,12 +57,12 @@ func Transmit(l *net.UDPConn, a *net.UDPAddr, m Message) error {
 }
 
 // Receive a message.
-func Receive(l *net.UDPConn, buf []byte) (Message, error) {
+func Receive(l *net.UDPConn, buf []byte) (*Message, error) {
 	l.SetReadDeadline(time.Now().Add(ResponseTimeout))
 
 	nr, _, err := l.ReadFromUDP(buf)
 	if err != nil {
-		return Message{}, err
+		return &Message{}, err
 	}
 	return ParseMessage(buf[:nr])
 }
